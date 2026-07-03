@@ -11,6 +11,11 @@
 python3 -m pip install "pymodbus>=3.6"
 ```
 
+這份範例已處理 `pymodbus` 新舊版名稱差異：
+
+- 舊版常見名稱：`ModbusSlaveContext`
+- 新版常見名稱：`ModbusDeviceContext`
+
 ## 先跑模擬設備
 
 ```bash
