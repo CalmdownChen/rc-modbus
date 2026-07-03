@@ -26,7 +26,16 @@ SCALE = 10
 
 
 def read_holding_register(client: ModbusTcpClient, address: int, count: int):
-    """Support current pymodbus versions and older versions with unit=."""
+    """Support pymodbus versions using device_id=, slave=, or unit=."""
+    try:
+        return client.read_holding_registers(
+            address=address,
+            count=count,
+            device_id=SLAVE_ID,
+        )
+    except TypeError:
+        pass
+
     try:
         return client.read_holding_registers(
             address=address,
