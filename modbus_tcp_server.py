@@ -16,18 +16,35 @@ The value is encoded as temperature * 10, so 25.3 C is stored as 253.
 
 import logging
 
-from pymodbus.datastore import ModbusServerContext
 from pymodbus.server import StartTcpServer
+
+try:
+    from pymodbus.simulator import DataType, SimData, SimDevice
+except ImportError:
+    DataType = None
+    SimData = None
+    SimDevice = None
+
+try:
+    from pymodbus.datastore import ModbusServerContext
+except ImportError:
+    ModbusServerContext = None
 
 try:
     from pymodbus.datastore import ModbusSequentialDataBlock
 except ImportError:
-    from pymodbus.datastore.store import ModbusSequentialDataBlock
+    try:
+        from pymodbus.datastore.store import ModbusSequentialDataBlock
+    except ImportError:
+        ModbusSequentialDataBlock = None
 
 try:
-    from pymodbus.datastore import ModbusSlaveContext as ModbusDevice
+    from pymodbus.datastore import ModbusSlaveContext as LegacyModbusDevice
 except ImportError:
-    from pymodbus.datastore import ModbusDeviceContext as ModbusDevice
+    try:
+        from pymodbus.datastore import ModbusDeviceContext as LegacyModbusDevice
+    except ImportError:
+        LegacyModbusDevice = None
 
 
 SERVER_HOST = "127.0.0.1"
@@ -40,14 +57,28 @@ SCALE = 10
 DATA_BLOCK_START_ADDRESS = 1
 
 
-def build_context():
-    raw_temperature = int(round(TEMPERATURE_C * SCALE))
+def build_sim_context(raw_temperature):
+    return [
+        SimDevice(
+            SLAVE_ID,
+            simdata=(
+                [SimData(0, values=[False], datatype=DataType.BITS)],
+                [SimData(0, values=[False], datatype=DataType.BITS)],
+                [SimData(REGISTER_ADDRESS, values=[raw_temperature], datatype=DataType.REGISTERS)],
+                [SimData(0, values=[0], datatype=DataType.REGISTERS)],
+            ),
+        )
+    ]
 
-    # pymodbus 3.13 rejects a data block that starts at address 0.
+
+def build_legacy_context(raw_temperature):
+    if not all((ModbusServerContext, ModbusSequentialDataBlock, LegacyModbusDevice)):
+        raise RuntimeError("Installed pymodbus version does not provide a supported server datastore API")
+
     holding_registers = [0] * (REGISTER_ADDRESS - DATA_BLOCK_START_ADDRESS + 10)
     holding_registers[REGISTER_ADDRESS - DATA_BLOCK_START_ADDRESS] = raw_temperature
 
-    device = ModbusDevice(
+    device = LegacyModbusDevice(
         hr=ModbusSequentialDataBlock(DATA_BLOCK_START_ADDRESS, holding_registers),
     )
 
@@ -55,6 +86,14 @@ def build_context():
         return ModbusServerContext(slaves={SLAVE_ID: device}, single=False)
     except TypeError:
         return ModbusServerContext(devices={SLAVE_ID: device}, single=False)
+
+
+def build_context():
+    raw_temperature = int(round(TEMPERATURE_C * SCALE))
+
+    if all((DataType, SimData, SimDevice)):
+        return build_sim_context(raw_temperature)
+    return build_legacy_context(raw_temperature)
 
 
 def main() -> None:
