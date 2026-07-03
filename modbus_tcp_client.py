@@ -7,8 +7,6 @@ Run against the simulator:
 For the real PLC later, change PLC_HOST to "192.168.4.3" and PLC_PORT to 502.
 """
 
-from __future__ import annotations
-
 from pymodbus.client import ModbusTcpClient
 
 

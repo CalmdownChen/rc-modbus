@@ -14,13 +14,16 @@ This server exposes one sample value:
 The value is encoded as temperature * 10, so 25.3 C is stored as 253.
 """
 
-from __future__ import annotations
-
 import logging
 
-from pymodbus.datastore import ModbusServerContext, ModbusSlaveContext
+from pymodbus.datastore import ModbusServerContext
 from pymodbus.datastore.store import ModbusSequentialDataBlock
 from pymodbus.server import StartTcpServer
+
+try:
+    from pymodbus.datastore import ModbusSlaveContext as ModbusDevice
+except ImportError:
+    from pymodbus.datastore import ModbusDeviceContext as ModbusDevice
 
 
 SERVER_HOST = "127.0.0.1"
@@ -32,17 +35,21 @@ TEMPERATURE_C = 25.3
 SCALE = 10
 
 
-def build_context() -> ModbusServerContext:
+def build_context():
     raw_temperature = int(round(TEMPERATURE_C * SCALE))
 
     # Allocate enough holding registers so address R2001 can be read directly.
     holding_registers = [0] * (REGISTER_ADDRESS + 10)
     holding_registers[REGISTER_ADDRESS] = raw_temperature
 
-    store = ModbusSlaveContext(
+    device = ModbusDevice(
         hr=ModbusSequentialDataBlock(0, holding_registers),
     )
-    return ModbusServerContext(slaves={SLAVE_ID: store}, single=False)
+
+    try:
+        return ModbusServerContext(slaves={SLAVE_ID: device}, single=False)
+    except TypeError:
+        return ModbusServerContext(devices={SLAVE_ID: device}, single=False)
 
 
 def main() -> None:
