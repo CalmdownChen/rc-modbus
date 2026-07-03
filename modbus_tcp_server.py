@@ -37,17 +37,18 @@ SLAVE_ID = 1
 REGISTER_ADDRESS = 2001
 TEMPERATURE_C = 25.3
 SCALE = 10
+DATA_BLOCK_START_ADDRESS = 1
 
 
 def build_context():
     raw_temperature = int(round(TEMPERATURE_C * SCALE))
 
-    # Allocate enough holding registers so address R2001 can be read directly.
-    holding_registers = [0] * (REGISTER_ADDRESS + 10)
-    holding_registers[REGISTER_ADDRESS] = raw_temperature
+    # pymodbus 3.13 rejects a data block that starts at address 0.
+    holding_registers = [0] * (REGISTER_ADDRESS - DATA_BLOCK_START_ADDRESS + 10)
+    holding_registers[REGISTER_ADDRESS - DATA_BLOCK_START_ADDRESS] = raw_temperature
 
     device = ModbusDevice(
-        hr=ModbusSequentialDataBlock(0, holding_registers),
+        hr=ModbusSequentialDataBlock(DATA_BLOCK_START_ADDRESS, holding_registers),
     )
 
     try:
