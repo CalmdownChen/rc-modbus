@@ -15,6 +15,7 @@ python3 -m pip install "pymodbus>=3.6"
 
 - 舊版常見名稱：`ModbusSlaveContext`
 - 新版常見名稱：`ModbusDeviceContext`
+- 新版可能需要直接從 `pymodbus.datastore` 匯入 `ModbusSequentialDataBlock`
 
 ## 先跑模擬設備
 
