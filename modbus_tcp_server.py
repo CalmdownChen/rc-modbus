@@ -17,8 +17,12 @@ The value is encoded as temperature * 10, so 25.3 C is stored as 253.
 import logging
 
 from pymodbus.datastore import ModbusServerContext
-from pymodbus.datastore.store import ModbusSequentialDataBlock
 from pymodbus.server import StartTcpServer
+
+try:
+    from pymodbus.datastore import ModbusSequentialDataBlock
+except ImportError:
+    from pymodbus.datastore.store import ModbusSequentialDataBlock
 
 try:
     from pymodbus.datastore import ModbusSlaveContext as ModbusDevice
