@@ -20,7 +20,7 @@ def scan_id_and_registers(ip, port, max_address=500):
     for uid in range(1, 256):
         print(f"Testing Device ID: {uid:3}...", end="\r")
         try:
-            # We use address 400 based on your previous valid response history
+            # We use address 400 based on your previous valid response history先前測試adress在400時有回應，故把400當探針
             # Any response (Error, Empty array, or Data) means the ID is active
             resp = client.read_holding_registers(address=400, count=1, device_id=uid)
             
