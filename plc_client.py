@@ -43,7 +43,7 @@ def scan_id_and_registers(ip, port, max_address=500):
     
     found_data = False
     
-    # Phase 2: Scan both Holding (FC03) and Input (FC04) registers
+    # Phase 2: Scan both Holding (FC03) and Input (FC04) registers 在不知道實際 Register Map 時，逐一測試哪些 Address 可以被讀取
     for addr in range(max_address + 1):
         print(f"Testing Address: {addr:4} (0x{addr:04X})...", end="\r")
         
