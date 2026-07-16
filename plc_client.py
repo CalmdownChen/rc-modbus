@@ -51,7 +51,7 @@ def scan_id_and_registers(ip, port, max_address=500):
         try:
             hr_resp = client.read_holding_registers(address=addr, count=1, device_id=active_id)
             # Verify response is valid and payload is not empty
-            if not hr_resp.isError() and hasattr(hr_resp, 'registers') and hr_resp.registers:
+            if not hr_resp.isError() and hasattr(hr_resp, 'registers') and hr_resp.registers:#檢查是否有錯誤及是否有值
                 print(f"\n[+] HIT | FC03 (Holding) | Address: {addr:<4} (0x{addr:04X}) | Data: {hr_resp.registers}")
                 found_data = True
         except Exception:
