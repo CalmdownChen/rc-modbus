@@ -28,7 +28,7 @@ REGISTER_MAP = {
     204: ("Pump2"),
 }
 
-def get_sensor__name(address):
+def get_sensor_name(address):
     return REGISTER_MAP.get(address, None)
 def scan_id_and_registers(ip, port, max_address=500):
     # Initialize client with a 0.3s timeout for rapid scanning
@@ -73,7 +73,7 @@ def scan_id_and_registers(ip, port, max_address=500):
     for addr in range(max_address + 1):
         print(f"Testing Address: {addr:4} (0x{addr:04X})...", end="\r")
         sensor_info = get_sensor_name(addr)
-        sensor_label = f" | [{sensor_info[0]}]" if sensor_info else ""
+        sensor_label = f" | [{sensor_info}]" if sensor_info else ""
         
         # Test 1: Holding Register (FC 03)
         try:
